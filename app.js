@@ -225,15 +225,23 @@ const optionResults = () => state.options.map((opt, i) => ({
   opt, i, color: OPT_COLORS[i % OPT_COLORS.length], r: computeSeason(optionInput(opt))
 }));
 
-/** Units that must be sold for this option to break even before tax. */
+/** Units that must be sold for this option to break even before tax.
+ *  Profit is only piecewise linear in the allocation - the 5% bonus switches
+ *  on the moment gross profit turns positive - so this bisects for the real
+ *  root rather than drawing a chord across the kink. */
 function breakEven(opt) {
   const req = N(opt.requested);
   if (req <= 0) return null;
-  const a = computeSeason(optionInput(opt, 0)).pbt;
-  const b = computeSeason(optionInput(opt, req)).pbt;
-  const slope = (b - a) / req;
-  if (slope <= 0) return null;
-  return -a / slope;
+  const pbtAt = a => computeSeason(optionInput(opt, a)).pbt;
+  if (pbtAt(req) < 0) return null;          // never breaks even, even filled
+  if (pbtAt(0) >= 0) return 0;              // profitable with no sales at all
+
+  let lo = 0, hi = req;
+  for (let i = 0; i < 40 && hi - lo > 0.5; i++) {
+    const mid = (lo + hi) / 2;
+    if (pbtAt(mid) >= 0) hi = mid; else lo = mid;
+  }
+  return hi;
 }
 
 /* ================================================================ charts === */
@@ -314,9 +322,14 @@ function allocationChart(series, id) {
 
   const maxX = Math.max(...series.map(s => s.maxAlloc), 1);
   const allY = series.flatMap(s => s.points.map(p => p.y));
-  let lo = Math.min(0, ...allY), hi = Math.max(0, ...allY);
-  const padY = (hi - lo) * 0.08 || 1;
-  lo -= padY; hi += padY;
+
+  /* Round the y scale out to a nice step so zero is always a labelled tick. */
+  const rawLo = Math.min(0, ...allY), rawHi = Math.max(0, ...allY);
+  const rawStep = (rawHi - rawLo) / 5 || 1;
+  const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const step = [1, 2, 2.5, 5, 10].find(m => m * mag >= rawStep) * mag;
+  const lo = Math.floor(rawLo / step) * step;
+  const hi = Math.ceil(rawHi / step) * step;
 
   const X = v => padL + v / maxX * plotW;
   const Y = v => padT + (hi - v) / (hi - lo) * plotH;
@@ -324,19 +337,14 @@ function allocationChart(series, id) {
   let svg = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" ' +
             'aria-label="Net profit against units allocated">';
 
-  // y grid
-  const ticks = 5;
-  for (let i = 0; i <= ticks; i++) {
-    const v = lo + (hi - lo) * i / ticks, y = Y(v);
-    svg += '<line class="grid-line" x1="' + padL + '" y1="' + y.toFixed(1) +
-           '" x2="' + (padL + plotW) + '" y2="' + y.toFixed(1) + '"/>';
-    svg += '<text x="' + (padL - 8) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end">' +
-           nf.format(Math.round(v / 1000)) + 'k</text>';
-  }
-  // zero line
-  if (lo < 0 && hi > 0) {
-    svg += '<line class="zero-line" x1="' + padL + '" y1="' + Y(0).toFixed(1) +
-           '" x2="' + (padL + plotW) + '" y2="' + Y(0).toFixed(1) + '"/>';
+  // y grid, on the nice step so 0 always lands on a line
+  for (let v = lo; v <= hi + step / 2; v += step) {
+    const y = Y(v), isZero = Math.abs(v) < step / 2;
+    svg += '<line class="' + (isZero ? 'zero-line' : 'grid-line') + '" x1="' + padL +
+           '" y1="' + y.toFixed(1) + '" x2="' + (padL + plotW) + '" y2="' + y.toFixed(1) + '"/>';
+    svg += '<text x="' + (padL - 8) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end"' +
+           (isZero ? ' style="fill:var(--ink-2);font-weight:600"' : '') + '>' +
+           (isZero ? '0' : nf.format(Math.round(v / 1000)) + 'k') + '</text>';
   }
   // x ticks
   for (let i = 0; i <= 5; i++) {
