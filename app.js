@@ -49,6 +49,10 @@ function defaults() {
     position: { override: false, cash: null, lossPool: null },
     rules: JSON.parse(JSON.stringify(RULES)),
 
+    /* --- Three Year 2 winter options -----------------------------------
+       A repeats Year 1 winter. B doubles capacity with a second Machine 1
+       (the cheapest capacity in the game). C is the half-measure, kept in
+       deliberately because it shows why half-measures lose here.          */
     options: [
       {
         id: 'o1', name: 'Option A · Hold Premise D',
@@ -58,15 +62,50 @@ function defaults() {
         newLoan: { name: '', amount: 0, termSeasons: 8, ratePct: 10 }
       },
       {
-        id: 'o2', name: 'Option B · Scale up at Premise F',
-        premises: [{ premiseId: 'F', machines: [{ typeId: 'M1', qty: 1 }, { typeId: 'M5', qty: 1 }], plannedProduction: 110000 }],
-        buyMachines: [{ typeId: 'M5', qty: 1 }],
-        milkTons: 6, marketInvestment: 12000, requested: 110000, allocated: 110000,
-        newLoan: { name: 'Winter expansion loan', amount: 40000, termSeasons: 8, ratePct: 10 }
+        id: 'o2', name: 'Option B · Premise F, second Machine 1',
+        premises: [{ premiseId: 'F', machines: [{ typeId: 'M1', qty: 2 }], plannedProduction: 140000 }],
+        buyMachines: [{ typeId: 'M1', qty: 1 }],
+        milkTons: 7, marketInvestment: 12000, requested: 140000, allocated: 140000,
+        newLoan: { name: 'Y2 winter expansion loan', amount: 90000, termSeasons: 8, ratePct: 10 }
+      },
+      {
+        id: 'o3', name: 'Option C · Expand but hold the milk back',
+        premises: [{ premiseId: 'F', machines: [{ typeId: 'M1', qty: 2 }], plannedProduction: 100000 }],
+        buyMachines: [{ typeId: 'M1', qty: 1 }],
+        milkTons: 5, marketInvestment: 9000, requested: 100000, allocated: 100000,
+        newLoan: { name: 'Y2 winter loan', amount: 25000, termSeasons: 8, ratePct: 10 }
       }
     ],
 
-    decision: { chosen: 'o1', assumedAllocation: 70000, text: '', assumption: '', downside: '' }
+    decision: {
+      chosen: 'o2',
+      assumedAllocation: 140000,
+
+      text: 'Take Option B. Move to Premise F, buy a second Machine 1, and commit 7 tons of milk ' +
+        'against a 140,000 request, funded by a Sh 90,000 loan over 8 seasons. At a full fill it ' +
+        'returns Sh 37,703 against Option A’s Sh 15,533, and it needs a LOWER fill rate to break ' +
+        'even — 82% against Option A’s 86% — because the fixed Sh 10,000 salaries and the rent ' +
+        'are spread over twice the volume. Machine 1 is the cheapest capacity in the game at 0.486 Sh ' +
+        'per unit bought and 0.086 Sh per unit to own each season, and it keeps earning for eight ' +
+        'seasons. Option C is in the tool to show why the half-measure loses: leaving Premise D doubles ' +
+        'transport from 0.1 to 0.2 per unit sold, which swallows almost the whole gain unless the extra ' +
+        'capacity is actually filled.',
+
+      assumption: 'That the trainer fills at least 82% of a 140,000 request. That is 28.1% of the ' +
+        'Year 2 winter forecast of 410,000 — and 35.2% of the market if it comes in 20% below ' +
+        'forecast at 328,000. The largest share this team has ever been granted is 25%, in Year 1 ' +
+        'winter, when we were filled in full on a 70,000 request. Everything rests on that one number: ' +
+        'above a 77% fill Option B beats Option A, below it Option A is better, and below 82% Option B ' +
+        'loses money outright.',
+
+      downside: 'At a 70% fill Option B loses Sh 29,508 against Option A’s Sh 20,541; at 50% it ' +
+        'loses Sh 77,725 against Sh 46,050. Cash stays positive in every case, so no rule is breached ' +
+        '— the loss is the punishment, not insolvency. The lever we control is the request itself. ' +
+        'Milk is the only cost spent before the trainer speaks and thrown away if unsold, so dropping ' +
+        'the request by one 10,000 block takes Sh 20,000 of committed milk off the table with it. If ' +
+        'the class starts requesting heavily, we cut to 120,000 units and 6 tons BEFORE the market, ' +
+        'not after.'
+    }
   };
 }
 
