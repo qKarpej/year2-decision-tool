@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Year 2 Winter Decision Tool</title>
+<meta name="description" content="Decision tool for the Year 2 winter season of Pork and Garlic Ice Cream Co.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#127846;</text></svg>">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <span class="brand-mark">&#127846;</span>
+      <div>
+        <h1>Year 2 Winter Decision Tool</h1>
+        <p class="sub" id="companyLine">Pork and Garlic Ice Cream Co.</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn" id="btnTheme" type="button" title="Light / dark">&#9681;</button>
+      <button class="btn" id="btnExport" type="button">Export</button>
+      <label class="btn" for="fileImport">Import</label>
+      <input type="file" id="fileImport" accept="application/json" hidden>
+      <button class="btn" id="btnReset" type="button">Reset</button>
+      <button class="btn btn-primary" id="btnPrint" type="button">Print / PDF</button>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab is-active" data-tab="position">1 &middot; Position</button>
+    <button class="tab" data-tab="rules">2 &middot; Year 2 rules</button>
+    <button class="tab" data-tab="options">3 &middot; Options</button>
+    <button class="tab" data-tab="results">4 &middot; Results</button>
+    <button class="tab" data-tab="compare">5 &middot; Compare</button>
+    <button class="tab" data-tab="check">6 &middot; Year 1 check</button>
+    <button class="tab" data-tab="decision">7 &middot; Decision</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- 1. POSITION -->
+<section class="panel" id="tab-position">
+  <h2>Opening position after Year 1 autumn</h2>
+  <p class="note">These are the real figures your team carried out of Year 1. Everything on this page is editable &mdash; replace the seeded numbers with your own classroom model.</p>
+
+  <div class="grid grid-3">
+    <label class="field"><span>Company name</span><input type="text" data-path="meta.company"></label>
+    <label class="field"><span>Team / student</span><input type="text" data-path="meta.team"></label>
+    <label class="field"><span>Currency symbol</span><input type="text" data-path="meta.currency" maxlength="3"></label>
+  </div>
+
+  <h3>Cash, debt and tax position</h3>
+  <div class="grid grid-4">
+    <label class="field"><span>Closing cash after Y1 autumn</span><input type="number" step="any" data-path="opening.cash"></label>
+    <label class="field"><span>Loans outstanding</span><input type="number" step="any" data-path="opening.loanPrincipal"></label>
+    <label class="field"><span>Unused tax losses carried forward</span><input type="number" step="any" data-path="opening.lossCF"></label>
+    <label class="field"><span>Year 1 annual profit <em>(reference)</em></span><input type="number" step="any" data-path="opening.y1Profit"></label>
+  </div>
+
+  <h3>Machines owned <button class="btn btn-sm" id="btnAddMachine" type="button">+ Add machine</button></h3>
+  <p class="note">Remaining life is counted in <strong>seasons</strong>. A machine with 0 seasons left is fully written down and charges no further depreciation.</p>
+  <div class="table-wrap"><table class="tbl" id="machineTable"></table></div>
+
+  <div class="callout" id="positionSummary"></div>
+</section>
+
+<!-- 2. RULES -->
+<section class="panel hidden" id="tab-rules">
+  <h2>Year 2 rules, prices and premises</h2>
+  <div class="warn-box">
+    <strong>Every figure on this page is an estimate carried over from Year 1.</strong>
+    The trainer has not yet issued the Year 2 rules, prices, premises or machine choices.
+    Nothing here is a confirmed Year 2 price. Update this page when the real rules arrive &mdash; every result recalculates automatically.
+  </div>
+
+  <h3>Prices and unit economics <span class="tag tag-est">estimate</span></h3>
+  <div class="grid grid-4">
+    <label class="field"><span>Selling price per unit</span><input type="number" step="any" data-path="rules.price"></label>
+    <label class="field"><span>Milk price per litre</span><input type="number" step="any" data-path="rules.milkPrice"></label>
+    <label class="field"><span>Litres of milk per unit</span><input type="number" step="any" data-path="rules.litresPerUnit"></label>
+    <label class="field"><span>Other variable cost per unit made</span><input type="number" step="any" data-path="rules.otherVarPerUnit"></label>
+    <label class="field"><span>Transport cost per unit sold</span><input type="number" step="any" data-path="rules.transportPerUnit"></label>
+    <label class="field"><span>Spoilage recovery on unsold units (%)</span><input type="number" step="any" data-path="rules.spoilRecoveryPct"></label>
+    <label class="field"><span>Interest rate per season (%)</span><input type="number" step="any" data-path="rules.interestRatePct"></label>
+    <label class="field"><span>Tax rate (%)</span><input type="number" step="any" data-path="rules.taxRatePct"></label>
+    <label class="field"><span>Milk advance paid up front (%)</span><input type="number" step="any" data-path="rules.advancePct"></label>
+  </div>
+  <p class="note">Spoilage recovery is the share of production cost you get back on unsold units. 0&nbsp;% means ice cream left unsold is a total loss, which is the Year 1 assumption.</p>
+
+  <h3>Premises options <span class="tag tag-est">estimate</span> <button class="btn btn-sm" id="btnAddPremises" type="button">+ Add premises</button></h3>
+  <div class="table-wrap"><table class="tbl" id="premisesTable"></table></div>
+
+  <h3>Year 2 winter market forecast <span class="tag tag-warn">not a promise of sales</span></h3>
+  <div class="grid grid-3">
+    <label class="field"><span>Forecast total winter market (units)</span><input type="number" step="any" data-path="rules.forecastMarketUnits"></label>
+    <label class="field"><span>Number of competing companies</span><input type="number" step="any" data-path="rules.competitors"></label>
+    <label class="field"><span>Your note on the forecast</span><input type="text" data-path="rules.forecastNote"></label>
+  </div>
+  <div class="callout" id="forecastSummary"></div>
+</section>
+
+<!-- 3. OPTIONS -->
+<section class="panel hidden" id="tab-options">
+  <h2>Year 2 winter options</h2>
+  <p class="note">Set the decisions for each option, then enter the actual sales allocation you want to test. The trainer allocates the market in class &mdash; a sales request is only a request.</p>
+  <div class="toolbar">
+    <button class="btn btn-sm" id="btnAddScenario" type="button">+ Add option</button>
+    <span class="note" id="scenarioCount"></span>
+  </div>
+  <div id="scenarioInputs" class="scenario-grid"></div>
+</section>
+
+<!-- 4. RESULTS -->
+<section class="panel hidden" id="tab-results">
+  <h2>Projected profit &amp; loss and cash flow</h2>
+  <div id="resultsBody"></div>
+</section>
+
+<!-- 5. COMPARE -->
+<section class="panel hidden" id="tab-compare">
+  <h2>Where the money actually differs</h2>
+  <div id="compareBody"></div>
+</section>
+
+<!-- 6. YEAR 1 CHECK -->
+<section class="panel hidden" id="tab-check">
+  <h2>Year 1 season check</h2>
+  <p class="note">Enter <strong>one real Year 1 season</strong> exactly as it happened. Profit and closing cash below must match your classroom model. If they do not, the difference is shown so you can find it.</p>
+
+  <div class="grid grid-4">
+    <label class="field"><span>Which season</span><input type="text" data-path="y1.label"></label>
+    <label class="field"><span>Opening cash for that season</span><input type="number" step="any" data-path="y1.openingCash"></label>
+    <label class="field"><span>Loans outstanding at season start</span><input type="number" step="any" data-path="y1.openingLoans"></label>
+    <label class="field"><span>Tax losses brought in</span><input type="number" step="any" data-path="y1.lossCF"></label>
+  </div>
+
+  <h3>Year 1 rules that applied</h3>
+  <div class="grid grid-4">
+    <label class="field"><span>Selling price per unit</span><input type="number" step="any" data-path="y1.price"></label>
+    <label class="field"><span>Milk price per litre</span><input type="number" step="any" data-path="y1.milkPrice"></label>
+    <label class="field"><span>Litres per unit</span><input type="number" step="any" data-path="y1.litresPerUnit"></label>
+    <label class="field"><span>Other variable cost per unit</span><input type="number" step="any" data-path="y1.otherVarPerUnit"></label>
+    <label class="field"><span>Transport per unit sold</span><input type="number" step="any" data-path="y1.transportPerUnit"></label>
+    <label class="field"><span>Spoilage recovery (%)</span><input type="number" step="any" data-path="y1.spoilRecoveryPct"></label>
+    <label class="field"><span>Interest rate for the season (%)</span><input type="number" step="any" data-path="y1.interestRatePct"></label>
+    <label class="field"><span>Tax rate (%)</span><input type="number" step="any" data-path="y1.taxRatePct"></label>
+    <label class="field"><span>Milk advance paid up front (%)</span><input type="number" step="any" data-path="y1.advancePct"></label>
+  </div>
+
+  <h3>Year 1 decisions and what actually happened</h3>
+  <div class="grid grid-4">
+    <label class="field"><span>Production capacity that season</span><input type="number" step="any" data-path="y1.capacity"></label>
+    <label class="field"><span>Planned production (units)</span><input type="number" step="any" data-path="y1.plannedProduction"></label>
+    <label class="field"><span>Milk purchased (litres)</span><input type="number" step="any" data-path="y1.milkPurchase"></label>
+    <label class="field"><span>Sales requested (units)</span><input type="number" step="any" data-path="y1.salesRequest"></label>
+    <label class="field"><span>Sales actually allocated (units)</span><input type="number" step="any" data-path="y1.actualSales"></label>
+    <label class="field"><span>Market investment paid</span><input type="number" step="any" data-path="y1.marketing"></label>
+    <label class="field"><span>Rent paid</span><input type="number" step="any" data-path="y1.rent"></label>
+    <label class="field"><span>Machine running cost</span><input type="number" step="any" data-path="y1.machineRun"></label>
+    <label class="field"><span>Depreciation charged</span><input type="number" step="any" data-path="y1.depreciation"></label>
+    <label class="field"><span>Machines bought (cash)</span><input type="number" step="any" data-path="y1.machinePurchaseCash"></label>
+    <label class="field"><span>New borrowing taken</span><input type="number" step="any" data-path="y1.borrowing"></label>
+    <label class="field"><span>Loan repaid</span><input type="number" step="any" data-path="y1.repayment"></label>
+  </div>
+
+  <h3>Your classroom model said</h3>
+  <div class="grid grid-2">
+    <label class="field"><span>Profit in the classroom model</span><input type="number" step="any" data-path="y1.modelProfit"></label>
+    <label class="field"><span>Closing cash in the classroom model</span><input type="number" step="any" data-path="y1.modelCash"></label>
+  </div>
+
+  <div id="y1Body"></div>
+</section>
+
+<!-- 7. DECISION -->
+<section class="panel hidden" id="tab-decision">
+  <h2>Recommendation</h2>
+  <div class="grid grid-2">
+    <label class="field"><span>Recommended option</span><select data-path="decision.chosen" id="chosenSelect"></select></label>
+    <label class="field"><span>Sales allocation this recommendation assumes (units)</span><input type="number" step="any" data-path="decision.assumedSales"></label>
+  </div>
+  <label class="field"><span>Our recommendation</span><textarea rows="4" data-path="decision.text" placeholder="We recommend ..."></textarea></label>
+  <label class="field"><span>The single most important assumption</span><textarea rows="3" data-path="decision.assumption" placeholder="This recommendation holds only if ..."></textarea></label>
+  <label class="field"><span>If the trainer allocates fewer sales than we hoped</span><textarea rows="3" data-path="decision.downside" placeholder="If we are allocated only ... units we would ..."></textarea></label>
+  <div id="decisionBody"></div>
+</section>
+
+</main>
+
+<footer>
+  <p>Built for the ice cream simulation in Vadibas gramatvediba un uznemuma finanses. All inputs are stored in your own browser only. Year 2 rules are estimates until the trainer confirms them.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
