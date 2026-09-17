@@ -35,7 +35,10 @@ function defaults() {
   winter.milkTons = 3.5;
   winter.marketInvestment = 5000;
   winter.requested = 70000;
-  winter.allocated = 70000;              // TRAINER'S REAL NUMBER GOES HERE
+  /* The trainer allocated 20,000 of the 70,000 requested - a 29% fill.
+     50,000 ice creams were made and thrown away. This one number is the
+     whole reason the Year 2 plan looks the way it does. */
+  winter.allocated = 20000;
   winter.newLoan = { name: 'Winter loan', amount: 50000, termSeasons: 8, ratePct: 10 };
 
   const spring = blankSeason('spring', 'Year 1 spring');
@@ -50,61 +53,71 @@ function defaults() {
     rules: JSON.parse(JSON.stringify(RULES)),
 
     /* --- Three Year 2 winter options -----------------------------------
-       A repeats Year 1 winter. B doubles capacity with a second Machine 1
-       (the cheapest capacity in the game). C is the half-measure, kept in
-       deliberately because it shows why half-measures lose here.          */
+       Written after the Year 1 winter market result. The company has
+       Sh 37,950 of cash, Sh 43,750 of debt and a Sh 75,175 loss pool, and
+       it was filled on only 29% of what it asked for. Every option is
+       sized against that, not against the forecast.
+       Default allocations are set at the 29% fill actually experienced,
+       so the tool opens on the honest case rather than the hopeful one. */
     options: [
       {
-        id: 'o1', name: 'Option A · Hold Premise D',
+        id: 'o1', name: 'Option A · Survive the winter',
+        premises: [{ premiseId: 'B', machines: [{ typeId: 'M1', qty: 1 }], plannedProduction: 20000 }],
+        buyMachines: [],
+        milkTons: 1, marketInvestment: 5000, requested: 20000, allocated: 10000,
+        newLoan: { name: 'Y2 winter working loan', amount: 15000, termSeasons: 8, ratePct: 10 }
+      },
+      {
+        id: 'o2', name: 'Option B · Rebuild at Premise D',
         premises: [{ premiseId: 'D', machines: [{ typeId: 'M1', qty: 1 }], plannedProduction: 70000 }],
         buyMachines: [],
-        milkTons: 3.5, marketInvestment: 5000, requested: 70000, allocated: 70000,
-        newLoan: { name: '', amount: 0, termSeasons: 8, ratePct: 10 }
+        milkTons: 3.5, marketInvestment: 10000, requested: 70000, allocated: 20000,
+        newLoan: { name: 'Y2 winter loan', amount: 55000, termSeasons: 8, ratePct: 10 }
       },
       {
-        id: 'o2', name: 'Option B · Premise F, second Machine 1',
-        premises: [{ premiseId: 'F', machines: [{ typeId: 'M1', qty: 2 }], plannedProduction: 140000 }],
-        buyMachines: [{ typeId: 'M1', qty: 1 }],
-        milkTons: 7, marketInvestment: 12000, requested: 140000, allocated: 140000,
-        newLoan: { name: 'Y2 winter expansion loan', amount: 90000, termSeasons: 8, ratePct: 10 }
-      },
-      {
-        id: 'o3', name: 'Option C · Expand but hold the milk back',
-        premises: [{ premiseId: 'F', machines: [{ typeId: 'M1', qty: 2 }], plannedProduction: 100000 }],
-        buyMachines: [{ typeId: 'M1', qty: 1 }],
-        milkTons: 5, marketInvestment: 9000, requested: 100000, allocated: 100000,
+        id: 'o3', name: 'Option C · Half-way at Premise D',
+        premises: [{ premiseId: 'D', machines: [{ typeId: 'M1', qty: 1 }], plannedProduction: 40000 }],
+        buyMachines: [],
+        milkTons: 2, marketInvestment: 10000, requested: 40000, allocated: 10000,
         newLoan: { name: 'Y2 winter loan', amount: 25000, termSeasons: 8, ratePct: 10 }
       }
     ],
 
     decision: {
-      chosen: 'o2',
-      assumedAllocation: 140000,
+      chosen: 'o1',
+      assumedAllocation: 10000,
 
-      text: 'Take Option B. Move to Premise F, buy a second Machine 1, and commit 7 tons of milk ' +
-        'against a 140,000 request, funded by a Sh 90,000 loan over 8 seasons. At a full fill it ' +
-        'returns Sh 37,703 against Option A’s Sh 15,533, and it needs a LOWER fill rate to break ' +
-        'even — 82% against Option A’s 86% — because the fixed Sh 10,000 salaries and the rent ' +
-        'are spread over twice the volume. Machine 1 is the cheapest capacity in the game at 0.486 Sh ' +
-        'per unit bought and 0.086 Sh per unit to own each season, and it keeps earning for eight ' +
-        'seasons. Option C is in the tool to show why the half-measure loses: leaving Premise D doubles ' +
-        'transport from 0.1 to 0.2 per unit sold, which swallows almost the whole gain unless the extra ' +
-        'capacity is actually filled.',
+      text: 'Take Option A. Rent Premise B, run the Machine 1 we already own, buy the mandatory ' +
+        'single ton of milk, request 20,000 units, invest Sh 5,000 in the market and take a small ' +
+        'Sh 15,000 loan to keep cash positive to the end of the season. This is not ambition, it is ' +
+        'arithmetic. In Year 1 winter we bought 3.5 tons of milk to back a 70,000 request, the trainer ' +
+        'allocated us 20,000, and we threw away 50,000 ice creams. That single decision cost Sh 75,175 ' +
+        'and left us with Sh 37,950 of cash against Sh 43,750 of debt. The tool measures the trade ' +
+        'exactly: one extra unit requested and sold is worth +Sh 1.80, and one extra unit requested and ' +
+        'NOT sold costs Sh 1.10. So an extra unit of request only pays if we expect it to be filled ' +
+        'more than 61% of the time. We were filled 29%. Until that changes, every ton of milk beyond ' +
+        'the minimum is a bet we have already lost once. Premise B has the lowest rent in the game at ' +
+        'Sh 10,000, and its high 0.4 transport rate barely matters when volumes are small — and it ' +
+        'is one of the three premises that can store unused milk under the Year 2 rules, which turns ' +
+        'our worst risk into a carried asset if the trainer allows it.',
 
-      assumption: 'That the trainer fills at least 82% of a 140,000 request. That is 28.1% of the ' +
-        'Year 2 winter forecast of 410,000 — and 35.2% of the market if it comes in 20% below ' +
-        'forecast at 328,000. The largest share this team has ever been granted is 25%, in Year 1 ' +
-        'winter, when we were filled in full on a 70,000 request. Everything rests on that one number: ' +
-        'above a 77% fill Option B beats Option A, below it Option A is better, and below 82% Option B ' +
-        'loses money outright.',
+      assumption: 'That the class keeps over-requesting, so fill rates stay low. The evidence: in Year 1 ' +
+        'winter the six teams asked for 620,000 units against a saleable market of 330,000 — 88% more ' +
+        'than existed — and the trainer cut 290,000, almost exactly 50,000 from every team regardless ' +
+        'of what they had asked for. That flat cut is why the top team kept 85% of a 330,000 request ' +
+        'while we kept 29% of a 70,000 one. Note also that the market came in at 336,000, a full 20% ' +
+        'ABOVE forecast — the best case — and we were still cut to 29%. If the trainer switches to ' +
+        'proportional cutting, or if the class requests modestly in Year 2, this recommendation is wrong ' +
+        'and Option B is the better plan.',
 
-      downside: 'At a 70% fill Option B loses Sh 29,508 against Option A’s Sh 20,541; at 50% it ' +
-        'loses Sh 77,725 against Sh 46,050. Cash stays positive in every case, so no rule is breached ' +
-        '— the loss is the punishment, not insolvency. The lever we control is the request itself. ' +
-        'Milk is the only cost spent before the trainer speaks and thrown away if unsold, so dropping ' +
-        'the request by one 10,000 block takes Sh 20,000 of committed milk off the table with it. If ' +
-        'the class starts requesting heavily, we cut to 120,000 units and 6 tons BEFORE the market, ' +
-        'not after.'
+      downside: 'Option A is already built for a thin allocation: at the 29% fill we actually ' +
+        'experienced it loses about Sh 46,000, against roughly Sh 41,550 for sitting the season out ' +
+        'entirely — and sitting out is not free, because the minimum ton of milk, the Sh 1,000 market ' +
+        'investment, Sh 10,000 of salaries, maintenance and the bank payment all fall due anyway. The ' +
+        'Sh 15,000 loan exists precisely so closing cash stays positive at that fill rate rather than ' +
+        'breaching the rule. The real danger is the opposite case: if we are filled generously and have ' +
+        'only one ton of milk, we leave money on the table. We accept that. Having just lost Sh 75,175 ' +
+        'on the reverse mistake, the cheaper error is the one that does not end the company.'
     }
   };
 }
@@ -882,6 +895,8 @@ function renderRules() {
       'at 0.792.</p>' +
     '</div>' +
 
+    marketEvidenceCard() +
+
     '<div class="card"><h3>Demand forecast <span class="badge">not a promise of sales</span></h3>' +
       '<div class="t-wrap"><table class="t"><thead><tr><th>Season</th><th class="n">Year 1</th>' +
       '<th class="n">Year 2</th><th class="n">Year 3</th><th class="n">Year 2 range &plusmn;20%</th>' +
@@ -899,6 +914,65 @@ function renderRules() {
       u(FORECAST.winter.y2 * 1.2) + '. If demand exceeds supply the trainer trims the lowest-ranked ' +
       'requests in 10,000-unit blocks &mdash; so a large request is not a large allocation.</p>' +
     '</div>';
+}
+
+/* ------------------------------------------- the Year 1 winter market ----- */
+
+/** The one piece of hard evidence about how the trainer actually allocates.
+ *  Everything in the Year 2 plan is argued from this table. */
+function marketEvidenceCard() {
+  const M = Y1_WINTER_MARKET;
+  const rows = M.teams.map(t => {
+    const fill = t.requested > 0 ? t.sold / t.requested : 0;
+    return '<tr' + (t.us ? ' class="sub"' : '') + '>' +
+      '<td>' + (t.us ? '<strong>' + esc(t.team) + '</strong> ← us' : esc(t.team)) + '</td>' +
+      '<td class="n">' + sh(t.investment) + '</td>' +
+      '<td class="n">' + u(t.requested) + '</td>' +
+      '<td class="n">' + u(t.cut) + '</td>' +
+      '<td class="n">' + u(t.sold) + '</td>' +
+      '<td class="n ' + (fill < 0.5 ? 'is-neg' : '') + '">' + Math.round(fill * 100) + '%</td>' +
+      '<td class="n">' + sh(t.sold * RULES.pricePerUnit) + '</td></tr>';
+  }).join('');
+
+  const over = M.totalRequested / M.saleableMarket - 1;
+  const swing = M.marketSize / M.forecast - 1;
+
+  return '<div class="card"><h3>What the Year 1 winter market actually did ' +
+      '<span class="badge badge-bad">the evidence</span></h3>' +
+
+    '<div class="tiles" style="margin-bottom:16px">' +
+      tile('Forecast', u(M.forecast), 'the handout’s number') +
+      tile('Actual market', u(M.marketSize), (swing >= 0 ? '+' : '') + Math.round(swing * 100) + '% — the top of the range') +
+      tile('Requested by all teams', u(M.totalRequested), Math.round(over * 100) + '% more than existed', 'is-neg') +
+      tile('Cut by the trainer', u(M.totalCut), 'about 50,000 per team', 'is-neg') +
+      tile('Our fill rate', '29%', '20,000 of 70,000 asked', 'is-neg') +
+    '</div>' +
+
+    '<div class="t-wrap"><table class="t"><thead><tr><th>Team</th><th class="n">Market investment</th>' +
+    '<th class="n">Requested</th><th class="n">Cut</th><th class="n">Sold</th><th class="n">Fill rate</th>' +
+    '<th class="n">Revenue</th></tr></thead><tbody>' + rows +
+    '<tr class="total"><td>All teams</td><td class="n"></td><td class="n">' + u(M.totalRequested) + '</td>' +
+    '<td class="n">' + u(M.totalCut) + '</td><td class="n">' + u(M.totalSold) + '</td>' +
+    '<td class="n">' + Math.round(M.totalSold / M.totalRequested * 100) + '%</td>' +
+    '<td class="n">' + sh(M.totalRevenue) + '</td></tr></tbody></table></div>' +
+
+    '<div class="alert alert-critical" style="margin-top:14px"><span class="ico">' + ICONS.critical +
+      '</span><span><strong>The cut was roughly flat, not proportional.</strong> Almost every team lost ' +
+      '50,000 units regardless of what it had asked for. That is why the largest requester kept 85% of ' +
+      'its request while we kept 29% of ours. A flat cut punishes small requests hardest in percentage ' +
+      'terms &mdash; but backing a large request means buying the milk first, and milk that is not sold ' +
+      'is thrown away.</span></div>' +
+
+    '<div class="alert alert-warning" style="margin-top:8px"><span class="ico">' + ICONS.warning +
+      '</span><span>The market came in at ' + u(M.marketSize) + ', a full ' + Math.round(swing * 100) +
+      '% <em>above</em> forecast &mdash; the best case the rules allow &mdash; and we were still cut to ' +
+      '29%. A Year 2 plan that needs a generous allocation is betting against the only evidence we ' +
+      'have.</span></div>' +
+
+    '<p class="hint" style="margin-top:12px">Transcribed from the trainer’s allocation screen. Our own ' +
+    'row is confirmed; the other rows reconcile exactly to the printed totals, so the reading is sound. ' +
+    'Correct them in <code>data.js</code> if any figure is wrong.</p>' +
+  '</div>';
 }
 
 /* ============================================================== page 04 === */

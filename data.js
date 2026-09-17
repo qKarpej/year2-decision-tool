@@ -56,5 +56,29 @@ const FORECAST = {
   autumn: { y1: 320000, y2: 470000, y3: 620000 }
 };
 
+/* --- What the Year 1 winter market actually did ---------------------------
+   Transcribed from the trainer's allocation screen. Group 7's own row is
+   confirmed; the rest reconciles exactly to the printed totals (requested
+   620,000, cut 290,000, sold 330,000, revenue Sh 660,000), so the reading
+   is sound. This is the only hard evidence the company has about how the
+   trainer ranks and trims, and it is what the Year 2 plan has to respect. */
+const Y1_WINTER_MARKET = {
+  forecast: 280000,        // the handout's Year 1 winter forecast
+  marketSize: 336000,      // what the market actually came in at: +20%, the top of the range
+  saleableMarket: 330000,  // rounded down to whole 10,000-unit blocks
+  totalRequested: 620000,
+  totalCut: 290000,
+  totalSold: 330000,
+  totalRevenue: 660000,
+  teams: [
+    { team: 'Rank 1',  investment: 7000, requested: 330000, cut: 50000, sold: 280000, us: false },
+    { team: 'Group 7', investment: 5000, requested:  70000, cut: 50000, sold:  20000, us: true  },
+    { team: 'Rank 3',  investment: 3000, requested:  60000, cut: 50000, sold:  10000, us: false },
+    { team: 'Rank 4',  investment: 2000, requested:  60000, cut: 50000, sold:  10000, us: false },
+    { team: 'Rank 5',  investment: 1000, requested:  60000, cut: 50000, sold:  10000, us: false },
+    { team: 'Rank 6',  investment: 1000, requested:  40000, cut: 40000, sold:      0, us: false }
+  ]
+};
+
 const machineById = id => MACHINES.find(m => m.id === id);
 const premiseById = id => PREMISES.find(p => p.id === id);
