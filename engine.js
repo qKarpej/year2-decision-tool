@@ -257,6 +257,12 @@ function computeSeason(inp) {
   if (marketInvestment < rules.minMarketInvestment)
     add('critical', 'Minimum market investment is Sh ' + rules.minMarketInvestment.toLocaleString('en-GB') +
       ' every season. This plan invests ' + marketInvestment.toLocaleString('en-GB') + '.');
+  if (inp.newLoan && nz(inp.newLoan.amount) > 0) {
+    const term = nz(inp.newLoan.termSeasons);
+    if (term < 1 || term > RULES.maxLoanTerm)
+      add('critical', 'A repayment term must be 1 to ' + RULES.maxLoanTerm +
+        ' seasons, and no longer than two game years. This loan is set to ' + term + '.');
+  }
   if (requested % rules.requestBlock !== 0)
     add('critical', 'Sales must be requested in whole blocks of ' +
       rules.requestBlock.toLocaleString('en-GB') + '. ' + requested.toLocaleString('en-GB') + ' is not a whole block.');

@@ -536,6 +536,73 @@ function decisionEditor(obj, P) {
     '</fieldset>';
 }
 
+/* --------------------------------------------------------- debt schedule --- */
+
+/** Season 0 is Year 1 winter, season 4 is Year 2 winter, and so on. */
+function seasonLabel(offset) {
+  const year = Math.floor(offset / 4) + 1;
+  const s = SEASONS[((offset % 4) + 4) % 4];
+  return 'Y' + year + ' ' + s;
+}
+
+/** s.08: equal principal each season at 10% on the balance before repayment. */
+function remainingSchedule(loan, startOffset) {
+  const rows = [];
+  let out = N(loan.outstanding);
+  const per = Math.max(N(loan.principalPerSeason), 1);
+  for (let i = 0; out > 0.5 && i < 24; i++) {
+    const interest = Math.round(out * N(loan.ratePct) / 100);
+    const principal = Math.min(per, out);
+    rows.push({
+      label: seasonLabel(startOffset + i), offset: startOffset + i,
+      opening: out, interest, principal, payment: principal + interest, closing: out - principal
+    });
+    out -= principal;
+  }
+  return rows;
+}
+
+const LAST_Y3_SEASON = 11;   // Y3 autumn, the deadline for a Year 1 or Year 2 loan
+
+function debtScheduleCard(loans, startOffset) {
+  if (!loans.length) return '';
+
+  const blocks = loans.map(l => {
+    const rows = remainingSchedule(l, startOffset);
+    if (!rows.length) return '';
+    const last = rows[rows.length - 1];
+    const late = last.offset > LAST_Y3_SEASON;
+    const totalInterest = rows.reduce((s, r) => s + r.interest, 0);
+
+    return '<h3 class="section-title" style="margin-top:18px">' + esc(l.name) + '</h3>' +
+      '<div class="t-wrap"><table class="t"><thead><tr><th>Season</th><th class="n">Debt before</th>' +
+      '<th class="n">Interest 10%</th><th class="n">Principal</th><th class="n">Bank payment</th>' +
+      '<th class="n">Debt after</th></tr></thead><tbody>' +
+      rows.map(r => '<tr><td>' + r.label + '</td><td class="n">' + sh(r.opening) + '</td>' +
+        '<td class="n">' + sh(r.interest) + '</td><td class="n">' + sh(r.principal) + '</td>' +
+        '<td class="n">' + sh(r.payment) + '</td><td class="n">' + sh(r.closing) + '</td></tr>').join('') +
+      '<tr class="total"><td>Still to pay</td><td class="n"></td><td class="n">' + sh(totalInterest) + '</td>' +
+      '<td class="n">' + sh(rows.reduce((s, r) => s + r.principal, 0)) + '</td>' +
+      '<td class="n">' + sh(rows.reduce((s, r) => s + r.payment, 0)) + '</td><td class="n">Sh 0</td></tr>' +
+      '</tbody></table></div>' +
+      '<div class="alert alert-' + (late ? 'critical' : 'good') + '" style="margin-top:10px">' +
+      '<span class="ico">' + (late ? ICONS.critical : ICONS.good) + '</span><span>' +
+      (late
+        ? 'This loan is still outstanding after ' + seasonLabel(LAST_Y3_SEASON) +
+          '. A loan taken in Year 1 or Year 2 must be fully repaid by the end of Year 3 &mdash; ' +
+          'shorten the term or make an extra principal repayment by Year 3 autumn.'
+        : 'Clears in <strong>' + last.label + '</strong>, inside the Year 3 deadline. ' +
+          sh(totalInterest) + ' of interest left to pay.') +
+      '</span></div>';
+  }).join('');
+
+  return '<div class="card"><h3>Debt schedule</h3>' +
+    '<p class="hint">Equal principal every season, interest at 10% on the balance standing before that ' +
+    'season’s repayment. The term is the team’s own choice &mdash; one to eight seasons, and no ' +
+    'longer than two game years. A Year 1 or Year 2 loan must be fully repaid by the end of Year 3.</p>' +
+    blocks + '</div>';
+}
+
 /* ============================================================== page 01 === */
 
 function renderPosition() {
@@ -604,6 +671,8 @@ function renderPosition() {
           '</tbody></table></div>'
         : '<p class="hint">No debt outstanding.</p>') +
     '</div>' +
+
+    debtScheduleCard(pos.loans, c.playedCount) +
 
     '<div class="card"><h3>Override the carried position</h3>' +
       '<p class="hint">Leave this off unless the trainer or your classroom model gives a different ' +
