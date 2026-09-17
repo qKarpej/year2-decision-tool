@@ -94,6 +94,22 @@ to a JSON file and **Import** reads them back.
 Import the repository in Vercel with the framework preset set to **Other**. No build
 command, no output directory — it is a static site.
 
+## The Year 1 accounting model
+
+`Pork-and-Garlic-Year-1-accounts-Group7.xlsx` is the classroom accounting model required by
+§ 10 of the handout: a decisions-and-results form per season, a cash flow, a profit & loss
+statement, and running records for machine life, loan debt and the unused tax loss pool.
+
+It is built from the handout **independently of the JavaScript engine in this repository** and
+recalculated by Excel. Both reach the same Year 1 winter result — net loss Sh 75,175 and
+closing cash Sh 37,950 — and the workbook's own proof line, *opening cash + net profit +
+depreciation + loan received − principal repaid − machines bought − closing cash*, comes to
+zero. That agreement between two separate implementations is what the green tick on the
+Year 1 ledger page rests on.
+
+Colour legend: blue = typed input, black = formula, green = pulled from another sheet,
+yellow = fill in each season.
+
 ## Files
 
 | File | Role |
