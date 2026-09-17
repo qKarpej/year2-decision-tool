@@ -4,9 +4,9 @@
    ========================================================================= */
 
 /* Bumped when the seeded figures change materially, so a browser holding an
-   older saved state does not quietly shadow the new defaults. v3 = the real
-   Year 1 winter allocation of 20,000 and the plan rebuilt around it. */
-const STORAGE_KEY = 'pgic-y2-tool-v3';
+   older saved state does not quietly shadow the new defaults. v4 adds the
+   Year 1 winter check against the Excel model. */
+const STORAGE_KEY = 'pgic-y2-tool-v4';
 const SEASONS = ['winter', 'spring', 'summer', 'autumn'];
 const OPT_COLORS = ['var(--series-1)', 'var(--series-2)', 'var(--series-3)'];
 
@@ -22,7 +22,11 @@ function blankSeason(key, name) {
     requested: 70000,
     allocated: 70000,
     newLoan: { name: '', amount: 0, termSeasons: 8, ratePct: RULES.loanRatePct },
-    modelProfit: null, modelCash: null
+    /* Checked against the Excel model in
+       Pork-and-Garlic-Year-1-accounts-Group7.xlsx, which is built from the
+       handout independently of this engine and recalculated by Excel.
+       Both reach -75,175 and 37,950, and its cash-to-profit proof ties to zero. */
+    modelProfit: -75175, modelCash: 37950
   };
 }
 
