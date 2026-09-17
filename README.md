@@ -5,7 +5,7 @@ It carries the real Year 1 position forward, compares possible winter strategies
 the handout's rules, and shows exactly where each one makes or loses money — and where
 it runs out of cash.
 
-**Live site:** _paste your Vercel URL here_
+**Live site:** https://year2-decision-tool-taupe.vercel.app/
 
 ---
 
