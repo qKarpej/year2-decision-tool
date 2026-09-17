@@ -3,7 +3,10 @@
    The accounting lives in engine.js; the catalogue lives in data.js.
    ========================================================================= */
 
-const STORAGE_KEY = 'pgic-y2-tool-v2';
+/* Bumped when the seeded figures change materially, so a browser holding an
+   older saved state does not quietly shadow the new defaults. v3 = the real
+   Year 1 winter allocation of 20,000 and the plan rebuilt around it. */
+const STORAGE_KEY = 'pgic-y2-tool-v3';
 const SEASONS = ['winter', 'spring', 'summer', 'autumn'];
 const OPT_COLORS = ['var(--series-1)', 'var(--series-2)', 'var(--series-3)'];
 
